@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { registerUser } from "../../services/auth.api";
+import { saveToken } from "../../utils/auth";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Lock } from "lucide-react";
 
@@ -38,9 +39,15 @@ export default function Register() {
                 payload.adminKey = form.adminKey.trim();
             }
 
-            await registerUser(payload);
+            const res = await registerUser(payload);
 
-            navigate("/login");
+            if (res.data?.token) {
+                saveToken(res.data.token);
+                navigate("/");
+                window.location.reload();
+            } else {
+                navigate("/login");
+            }
         } catch (err) {
             setError(err.response?.data?.message || "Register failed");
         } finally {
