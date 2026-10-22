@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getToken } from "../utils/auth";
+import { getToken, clearToken } from "../utils/auth";
 import { getMe } from "../services/auth.api";
 
 export default function ProtectedRoute({ children }) {
@@ -17,8 +17,8 @@ export default function ProtectedRoute({ children }) {
     getMe()
       .then(() => setIsValid(true))
       .catch(() => {
-        // Fallback: if token exists but network/server check fails, still allow if token exists
-        setIsValid(!!token);
+        clearToken();
+        setIsValid(false);
       });
   }, [token]);
 
