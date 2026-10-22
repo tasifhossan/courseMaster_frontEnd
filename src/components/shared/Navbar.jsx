@@ -134,7 +134,7 @@ export default function Navbar() {
                             className="
                 menu menu-sm dropdown-content mt-3 p-3 shadow
                 bg-base-100 rounded-box w-56 border border-base-300
-                items-center text-center max-h-32 overflow-hidden
+                items-center text-center z-50
               "
                         >
                             <li><NavLink className={navLinkClass} to="/">Home</NavLink></li>
