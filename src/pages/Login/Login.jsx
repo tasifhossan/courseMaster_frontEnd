@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { loginUser } from "../../services/auth.api";
-import { saveToken } from "../../utils/auth";
-import { Link, useNavigate } from "react-router-dom";
+import { saveToken, getToken } from "../../utils/auth";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, LogIn, Sparkles, ShieldCheck, UserCheck } from "lucide-react";
 
 export default function Login() {
+    if (getToken()) {
+        return <Navigate to="/" replace />;
+    }
+
     const navigate = useNavigate();
 
     const [form, setForm] = useState({ email: "", password: "" });
