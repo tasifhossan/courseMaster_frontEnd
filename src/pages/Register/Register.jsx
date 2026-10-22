@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { registerUser } from "../../services/auth.api";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Lock } from "lucide-react";
 
 export default function Register() {
     const navigate = useNavigate();
 
-    const [form, setForm] = useState({ name: "", email: "", password: "", adminKey: "" });
+    const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "", adminKey: "" });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showAdminKey, setShowAdminKey] = useState(false);
@@ -18,6 +21,12 @@ export default function Register() {
         try {
             setLoading(true);
             setError(null);
+
+            if (form.password !== form.confirmPassword) {
+                setError("Passwords do not match");
+                setLoading(false);
+                return;
+            }
 
             // Only send adminKey if it's provided
             const payload = {
@@ -86,17 +95,54 @@ export default function Register() {
                         </div>
                         <div className="form-control">
                             <label className="label">
-                                <span className="label-text font-semibold">Password</span>
+                                <span className="label-text font-semibold flex items-center gap-1.5">
+                                    <Lock className="w-4 h-4 text-primary" /> Password
+                                </span>
                             </label>
-                            <input
-                                name="password"
-                                type="password"
-                                value={form.password}
-                                onChange={handleChange}
-                                placeholder="Create a password"
-                                className="input input-bordered w-full focus:input-primary"
-                                required
-                            />
+                            <div className="relative flex items-center">
+                                <input
+                                    name="password"
+                                    type={showPassword ? "text" : "password"}
+                                    value={form.password}
+                                    onChange={handleChange}
+                                    placeholder="Create a password"
+                                    className="input input-bordered w-full focus:input-primary pr-10"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 text-base-content/50 hover:text-base-content"
+                                >
+                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text font-semibold flex items-center gap-1.5">
+                                    <Lock className="w-4 h-4 text-primary" /> Confirm Password
+                                </span>
+                            </label>
+                            <div className="relative flex items-center">
+                                <input
+                                    name="confirmPassword"
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    value={form.confirmPassword}
+                                    onChange={handleChange}
+                                    placeholder="Confirm your password"
+                                    className="input input-bordered w-full focus:input-primary pr-10"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="absolute right-3 text-base-content/50 hover:text-base-content"
+                                >
+                                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            </div>
                         </div>
 
                         {/* Admin Registration Key (Optional) */}
