@@ -8,7 +8,7 @@ import { getCourseById } from "../../services/courses.api";
 
 export default function StudentDashboard() {
     const dispatch = useDispatch();
-    const { enrollments, loading, error } = useSelector((state) => state.enrollment);
+    const { enrollments = [], loading, error } = useSelector((state) => state.enrollment);
     const { currentCourse } = useSelector((state) => state.courses);
 
     const [expandedCourse, setExpandedCourse] = useState(null);
