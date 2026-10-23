@@ -34,6 +34,7 @@ export default function AdminOverview() {
     const { enrollments, assignments } = useSelector((state) => state.admin);
     const [analytics, setAnalytics] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         dispatch(fetchEnrollments());
@@ -44,10 +45,12 @@ export default function AdminOverview() {
     const loadAnalytics = async () => {
         try {
             setLoading(true);
+            setError(null);
             const res = await getAnalytics();
             setAnalytics(res.data);
         } catch (err) {
             console.error("Failed to load analytics:", err);
+            setError(err.response?.data?.message || err.message || "Failed to load analytics");
         } finally {
             setLoading(false);
         }
@@ -133,10 +136,11 @@ export default function AdminOverview() {
     ];
 
     // Enrollment by course (top 5)
-    const courseEnrollmentData = analytics?.topCourses?.slice(0, 5).map((course) => ({
-        name: course.courseTitle?.substring(0, 15) || "Unknown",
-        enrollments: course.count,
-    })) || [];
+    const rawCourseData = analytics?.enrollmentsByCourse || analytics?.topCourses || [];
+    const courseEnrollmentData = rawCourseData.slice(0, 5).map((course) => ({
+        name: (course.courseName || course.courseTitle || "Unknown").substring(0, 15),
+        enrollments: course.enrollments ?? course.count ?? 0,
+    }));
 
     return (
         <div className="space-y-4 sm:space-y-6">
@@ -271,10 +275,22 @@ export default function AdminOverview() {
             </div>
 
             {/* Top Courses Chart */}
-            {courseEnrollmentData.length > 0 && (
-                <div className="card bg-base-100 border border-base-300 shadow-sm">
-                    <div className="card-body p-4 sm:p-6">
-                        <h2 className="page-heading-h2 mb-4">Top Courses by Enrollments</h2>
+            <div className="card bg-base-100 border border-base-300 shadow-sm">
+                <div className="card-body p-4 sm:p-6">
+                    <h2 className="page-heading-h2 mb-4">Top Courses by Enrollments</h2>
+                    {loading ? (
+                        <div className="flex justify-center items-center h-64 text-base-content/60">
+                            <span className="loading loading-spinner loading-md mr-2"></span>
+                            Loading course enrollment analytics...
+                        </div>
+                    ) : error ? (
+                        <div className="flex flex-col justify-center items-center h-64 text-error gap-2">
+                            <p>Failed to load course enrollment data</p>
+                            <button onClick={loadAnalytics} className="btn btn-sm btn-outline btn-error">
+                                Retry
+                            </button>
+                        </div>
+                    ) : courseEnrollmentData.length > 0 ? (
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={courseEnrollmentData} layout="vertical">
                                 <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
@@ -295,9 +311,13 @@ export default function AdminOverview() {
                                 <Bar dataKey="enrollments" fill="#50727B" radius={[0, 8, 8, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
-                    </div>
+                    ) : (
+                        <div className="flex justify-center items-center h-64 text-base-content/60">
+                            No course enrollment data available
+                        </div>
+                    )}
                 </div>
-            )}
+            </div>
 
             {/* Analytics Summary Section */}
             {analytics && (
