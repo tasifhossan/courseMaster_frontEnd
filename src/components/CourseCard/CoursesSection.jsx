@@ -21,6 +21,24 @@ export default function CoursesSection() {
     const [category, setCategory] = useState("");
     const [tags, setTags] = useState("");
 
+    // Debounced text filters to avoid flooding the backend on each keystroke
+    const [debouncedCategory, setDebouncedCategory] = useState(category);
+    const [debouncedTags, setDebouncedTags] = useState(tags);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedCategory(category);
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [category]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedTags(tags);
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [tags]);
+
     const fetchCourses = async () => {
         try {
             setLoading(true);
@@ -31,8 +49,8 @@ export default function CoursesSection() {
                 limit,
                 search: search || undefined,
                 sort: sort || undefined,
-                category: category || undefined,
-                tags: tags || undefined,
+                category: debouncedCategory || undefined,
+                tags: debouncedTags || undefined,
             };
 
             const res = await getCourses(params);
@@ -45,21 +63,21 @@ export default function CoursesSection() {
         }
     };
 
+    // Reset page to 1 when filters change
+    useEffect(() => {
+        setPage(1);
+    }, [sort, debouncedCategory, debouncedTags]);
+
     useEffect(() => {
         fetchCourses();
         // eslint-disable-next-line
-    }, [page, sort, category, tags]);
+    }, [page, sort, debouncedCategory, debouncedTags]);
 
     const onSearchSubmit = (e) => {
         e.preventDefault();
         setPage(1);
         fetchCourses();
     };
-
-    // reset page when filters change
-    useEffect(() => {
-        setPage(1);
-    }, [sort, category, tags]);
 
     return (
         <div className="space-y-6">
