@@ -5,7 +5,7 @@ import {
     fetchCourseById,
     clearCurrentCourse,
 } from "../../store/slices/coursesSlice";
-import { enrollCourseAsync, clearSuccess } from "../../store/slices/enrollmentSlice";
+import { enrollCourseAsync, clearSuccess, clearError } from "../../store/slices/enrollmentSlice";
 import { getMeAsync } from "../../store/slices/authSlice";
 
 export default function CourseDetails() {
@@ -20,7 +20,10 @@ export default function CourseDetails() {
 
     useEffect(() => {
         dispatch(fetchCourseById(id));
-        return () => dispatch(clearCurrentCourse());
+        return () => {
+            dispatch(clearCurrentCourse());
+            dispatch(clearError());
+        };
     }, [id, dispatch]);
 
     // Load user if token exists but user is not loaded
@@ -53,9 +56,7 @@ export default function CourseDetails() {
 
         if (cannotEnroll) return;
 
-        // Note: Since batches don't have _id in the model, we pass null
-        // The backend can be updated later to handle batch references properly
-        dispatch(enrollCourseAsync({ courseId: id, batchId: selectedBatchId !== null ? selectedBatchId.toString() : null }));
+        dispatch(enrollCourseAsync({ courseId: id, batchId: selectedBatchId || null }));
     };
 
     useEffect(() => {
@@ -113,7 +114,7 @@ export default function CourseDetails() {
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                             backgroundClip: 'text'
-                        }}>৳ {course.price * 100}</p>
+                        }}>৳ {course.price?.toLocaleString()}</p>
 
                         <div>
                             {isAdmin ? (
@@ -133,25 +134,28 @@ export default function CourseDetails() {
                                 <div className="alert alert-success">
                                     <span>{success}</span>
                                 </div>
-                            ) : enrollError ? (
-                                <div className="alert alert-error">
-                                    <span>{enrollError}</span>
-                                </div>
                             ) : alreadyEnrolled ? (
                                 <button onClick={() => navigate('/student')} className="btn btn-outline gap-2">
                                     Go to Dashboard
                                 </button>
                             ) : (
-                                <button onClick={handleEnroll} disabled={enrolling} className="btn btn-primary gap-2">
-                                    {enrolling ? (
-                                        <>
-                                            <span className="loading loading-spinner"></span>
-                                            Enrolling...
-                                        </>
-                                    ) : (
-                                        "Enroll Now"
+                                <div className="flex flex-col sm:items-end gap-2">
+                                    {enrollError && (
+                                        <div className="alert alert-error text-xs py-2 px-3">
+                                            <span>{enrollError}</span>
+                                        </div>
                                     )}
-                                </button>
+                                    <button onClick={handleEnroll} disabled={enrolling} className="btn btn-primary gap-2">
+                                        {enrolling ? (
+                                            <>
+                                                <span className="loading loading-spinner"></span>
+                                                Enrolling...
+                                            </>
+                                        ) : (
+                                            "Enroll Now"
+                                        )}
+                                    </button>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -256,13 +260,12 @@ export default function CourseDetails() {
                         <h2 className="page-heading-h2 mb-4">Available Batches</h2>
                         <div className="space-y-2">
                             {course.batches.map((batch, idx) => {
-                                // Use index as batch identifier since batches don't have _id
-                                const batchIndex = idx;
-                                const isSelected = selectedBatchId === batchIndex;
+                                const batchKey = batch._id ? batch._id.toString() : idx.toString();
+                                const isSelected = selectedBatchId === batchKey;
                                 return (
                                     <div
-                                        key={idx}
-                                        onClick={() => setSelectedBatchId(isSelected ? null : batchIndex)}
+                                        key={batchKey}
+                                        onClick={() => setSelectedBatchId(isSelected ? null : batchKey)}
                                         className={`flex justify-between items-center p-3 rounded cursor-pointer transition ${isSelected
                                             ? "bg-primary text-primary-content border-2 border-primary"
                                             : "bg-base-200 hover:bg-base-300 border-2 border-transparent"
@@ -272,7 +275,7 @@ export default function CourseDetails() {
                                             <input
                                                 type="radio"
                                                 checked={isSelected}
-                                                onChange={() => setSelectedBatchId(isSelected ? null : batchIndex)}
+                                                onChange={() => setSelectedBatchId(isSelected ? null : batchKey)}
                                                 className="radio radio-sm"
                                                 onClick={(e) => e.stopPropagation()}
                                             />
@@ -285,7 +288,7 @@ export default function CourseDetails() {
                                 );
                             })}
                         </div>
-                        {selectedBatchId && (
+                        {selectedBatchId !== null && (
                             <div className="mt-3 text-sm text-primary">
                                 ✓ Batch selected for enrollment
                             </div>
