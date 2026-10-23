@@ -51,8 +51,17 @@ export default function CoursePlayer() {
     const [selectedModule, setSelectedModule] = useState(0);
     const [selectedLesson, setSelectedLesson] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [completing, setCompleting] = useState(false);
+    const [completeError, setCompleteError] = useState(null);
 
     const { currentCourse } = useSelector((state) => state.courses);
+
+    const isLessonCompleted = (lessonId) => {
+        if (!lessonId || !enrollment?.progress?.completedLessons) return false;
+        return enrollment.progress.completedLessons
+            .map(String)
+            .includes(String(lessonId));
+    };
 
     useEffect(() => {
         dispatch(fetchCourseById(id)).then(() => setLoading(false));
@@ -70,13 +79,15 @@ export default function CoursePlayer() {
     }, [id, dispatch]);
 
     const handleMarkComplete = async () => {
-        if (!enrollment) return;
+        if (!enrollment || completing) return;
 
         const currentLesson =
             currentCourse?.syllabus[selectedModule]?.lessons[selectedLesson];
-        if (!currentLesson) return;
+        if (!currentLesson || isLessonCompleted(currentLesson._id)) return;
 
         try {
+            setCompleting(true);
+            setCompleteError(null);
             const result = await dispatch(
                 completeLessonAsync({
                     enrollmentId: enrollment._id,
@@ -96,6 +107,9 @@ export default function CoursePlayer() {
             dispatch(fetchMyEnrollments());
         } catch (err) {
             console.error("Failed to mark lesson complete:", err);
+            setCompleteError(err?.message || "Failed to mark lesson as complete");
+        } finally {
+            setCompleting(false);
         }
     };
 
@@ -152,11 +166,23 @@ export default function CoursePlayer() {
 
                                 <button
                                     onClick={handleMarkComplete}
-                                    disabled={!!enrollment?.progress?.completedLessons?.includes(lesson)}
-                                    className={`btn btn-sm sm:btn-md ${enrollment?.progress?.completedLessons?.includes(lesson) ? "btn-disabled" : "btn-success"} mt-3 sm:mt-4 w-full sm:w-auto`}
+                                    disabled={isLessonCompleted(lesson?._id) || completing}
+                                    className={`btn btn-sm sm:btn-md ${isLessonCompleted(lesson?._id) ? "btn-disabled text-success" : "btn-success"} mt-3 sm:mt-4 w-full sm:w-auto`}
                                 >
-                                    {enrollment?.progress?.completedLessons?.includes(lesson) ? "Completed ✓" : "✓ Mark as Complete"}
+                                    {completing ? (
+                                        <>
+                                            <span className="loading loading-spinner loading-xs mr-2"></span>
+                                            Marking...
+                                        </>
+                                    ) : isLessonCompleted(lesson?._id) ? (
+                                        "Completed ✓"
+                                    ) : (
+                                        "✓ Mark as Complete"
+                                    )}
                                 </button>
+                                {completeError && (
+                                    <p className="text-error text-xs mt-1">{completeError}</p>
+                                )}
                             </div>
                         </div>
                     )}
@@ -234,7 +260,7 @@ export default function CoursePlayer() {
                                                 const hasAssignment = !!les.assignmentPrompt;
                                                 const hasQuiz = les.quiz && les.quiz.length > 0;
                                                 const hasLiveClass = !!les.liveClassLink;
-                                                const isCompleted = enrollment?.progress?.completedLessons?.includes(les._id);
+                                                const isCompleted = isLessonCompleted(les._id);
                                                 
                                                 // Check if live class is upcoming
                                                 const isUpcoming = hasLiveClass && les.liveClassDate && new Date(les.liveClassDate) > new Date();
