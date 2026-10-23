@@ -5,7 +5,7 @@ import {
     fetchCourseById,
     clearCurrentCourse,
 } from "../../store/slices/coursesSlice";
-import { enrollCourseAsync, clearSuccess } from "../../store/slices/enrollmentSlice";
+import { enrollCourseAsync, clearSuccess, clearError } from "../../store/slices/enrollmentSlice";
 import { getMeAsync } from "../../store/slices/authSlice";
 
 export default function CourseDetails() {
@@ -20,7 +20,10 @@ export default function CourseDetails() {
 
     useEffect(() => {
         dispatch(fetchCourseById(id));
-        return () => dispatch(clearCurrentCourse());
+        return () => {
+            dispatch(clearCurrentCourse());
+            dispatch(clearError());
+        };
     }, [id, dispatch]);
 
     // Load user if token exists but user is not loaded
@@ -131,25 +134,28 @@ export default function CourseDetails() {
                                 <div className="alert alert-success">
                                     <span>{success}</span>
                                 </div>
-                            ) : enrollError ? (
-                                <div className="alert alert-error">
-                                    <span>{enrollError}</span>
-                                </div>
                             ) : alreadyEnrolled ? (
                                 <button onClick={() => navigate('/student')} className="btn btn-outline gap-2">
                                     Go to Dashboard
                                 </button>
                             ) : (
-                                <button onClick={handleEnroll} disabled={enrolling} className="btn btn-primary gap-2">
-                                    {enrolling ? (
-                                        <>
-                                            <span className="loading loading-spinner"></span>
-                                            Enrolling...
-                                        </>
-                                    ) : (
-                                        "Enroll Now"
+                                <div className="flex flex-col sm:items-end gap-2">
+                                    {enrollError && (
+                                        <div className="alert alert-error text-xs py-2 px-3">
+                                            <span>{enrollError}</span>
+                                        </div>
                                     )}
-                                </button>
+                                    <button onClick={handleEnroll} disabled={enrolling} className="btn btn-primary gap-2">
+                                        {enrolling ? (
+                                            <>
+                                                <span className="loading loading-spinner"></span>
+                                                Enrolling...
+                                            </>
+                                        ) : (
+                                            "Enroll Now"
+                                        )}
+                                    </button>
+                                </div>
                             )}
                         </div>
                     </div>
