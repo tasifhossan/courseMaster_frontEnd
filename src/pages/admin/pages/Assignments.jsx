@@ -83,7 +83,7 @@ export default function Assignments() {
     const activeSubmission = assignments.find((a) => a._id === reviewingId);
 
     return (
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-4 sm:space-y-6 w-full max-w-full min-w-0">
             <h1 className="page-heading">Assignment Review</h1>
 
             {/* Stats Cards */}

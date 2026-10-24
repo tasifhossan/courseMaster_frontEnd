@@ -73,16 +73,16 @@ export default function Login() {
                             <button
                                 type="button"
                                 onClick={() => handleQuickLogin("admin@coursemaster.com", "admin123")}
-                                className="btn btn-xs btn-outline btn-primary gap-1 font-semibold"
+                                className="btn btn-xs btn-primary text-white gap-1.5 font-medium shadow-xs hover:brightness-110 transition-all"
                             >
-                                <ShieldCheck className="w-3 h-3" /> Admin Fill
+                                <ShieldCheck className="w-3.5 h-3.5 text-white" /> Admin Fill
                             </button>
                             <button
                                 type="button"
                                 onClick={() => handleQuickLogin("student@coursemaster.com", "student123")}
-                                className="btn btn-xs btn-outline btn-secondary gap-1 font-semibold"
+                                className="btn btn-xs btn-secondary text-white gap-1.5 font-medium shadow-xs hover:brightness-110 transition-all"
                             >
-                                <UserCheck className="w-3 h-3" /> Student Fill
+                                <UserCheck className="w-3.5 h-3.5 text-white" /> Student Fill
                             </button>
                         </div>
                     </div>
