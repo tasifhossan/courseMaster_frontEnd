@@ -707,19 +707,21 @@ function QuizInterface({ quiz, courseId, lessonId, enrollment, onComplete }) {
                 </div>
 
                 {previousSubmission && !submitted && (
-                    <div className="alert alert-info mt-3 sm:mt-4">
+                    <div className="rounded-xl p-4 bg-info/10 border border-info/30 text-base-content mt-3 sm:mt-4 shadow-xs">
                         <div>
-                            <h4 className="font-bold text-sm sm:text-base">Previous Quiz Results</h4>
-                            <p className="text-base sm:text-lg mt-2">
-                                You scored: <span className="font-bold text-primary">{previousSubmission.percent}%</span>
+                            <h4 className="font-bold text-sm sm:text-base text-base-content flex items-center gap-1.5">
+                                📋 Previous Quiz Results
+                            </h4>
+                            <p className="text-base sm:text-lg mt-2 font-medium">
+                                You scored: <span className="font-bold text-success text-xl">{previousSubmission.percent}%</span>
                             </p>
-                            <p className="text-xs sm:text-sm mt-1 text-base-content/70">
+                            <p className="text-xs sm:text-sm mt-1 text-base-content/80 font-medium">
                                 {previousSubmission.score} out of {previousSubmission.total} questions correct
                             </p>
                             <p className="text-xs mt-1 text-base-content/60">
                                 Submitted: {new Date(previousSubmission.createdAt || previousSubmission.submittedAt).toLocaleString()}
                             </p>
-                            <p className="text-xs mt-2 text-base-content/60">
+                            <p className="text-xs mt-2 text-base-content/75 font-medium">
                                 💡 You can change your answers below and click "Retake Quiz" to submit a new attempt
                             </p>
                         </div>
