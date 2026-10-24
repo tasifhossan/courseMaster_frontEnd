@@ -1,5 +1,5 @@
 # CourseMaster - Frontend
-Live Link: https://course-master4981.netlify.app/
+Live Link: https://coursemaster-frontend-sable.vercel.app/
 
 Video link: https://drive.google.com/file/d/1vjMrBxr0-7xqjxMX2EBEBw30D_av1pOu/view
 
@@ -133,5 +133,5 @@ For complete API documentation with request/response formats, see [courseMaster_
 ## Deployment
 
 The frontend can be deployed to:
-- **Netlify**
+- **Vercel**
 
